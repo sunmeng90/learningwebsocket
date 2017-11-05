@@ -99,3 +99,67 @@ public class EchoServerConfig implements ServerApplicationConfig {
 //3..
 //4. start the web application.
 ```
+
+
+annotation endpoints
+
+```java
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
+
+@ServerEndpoint("/websocket/annotation/echo")
+public class AnnotatedEchoEndpoint {
+    private final String serverGreeting = "Server => ";
+
+    @OnOpen
+    public void onOpen(Session session){
+        System.out.println("start annotation endpoint...");
+    }
+
+    @OnMessage
+    public void onMessage(String msg, Session session) {
+        try {
+            if(session.isOpen()){
+                session.getBasicRemote().sendText(serverGreeting + msg);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+//Important: register endpoints
+public class EchoServerConfig implements ServerApplicationConfig {
+    @Override
+    public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> endpointClasses) {
+        Set<ServerEndpointConfig> result = new HashSet<>();
+        //create endpoint from EndpointConfig
+        ServerEndpointConfig endpointConfig = ServerEndpointConfig.Builder.create(EchoEndpoint.class, "/websocket/programmatic/echo").build();
+        result.add(endpointConfig);
+        return result;
+    }
+
+    //When using annotation endpoint, make sure register the annotation endpoints here, otherwise, client will get 404
+    @Override
+    public Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> scanned) {
+        //Deploy all annotated endpoints
+        Set<Class<?>> result = new HashSet<>();
+        for (Class<?> clazz : scanned) {
+            if (clazz.getPackage().getName().startsWith("annotation.") || clazz.getPackage().getName().startsWith("org.")) {
+                result.add(clazz);
+            }
+        }
+        return result;
+    }
+}
+
+```
+
+**Note: **  
+When using programmatic and annotation endpoints, make sure register the annotation endpoints here, otherwise, client will get 404.
+

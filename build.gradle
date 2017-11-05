@@ -11,6 +11,7 @@ allprojects {
 
     dependencies{
         compile group: 'javax', name: 'javaee-api', version: '7.0'
+//        compile group: 'javax.websocket', name: 'javax.websocket-api', version: '1.1'
     }
 }
 

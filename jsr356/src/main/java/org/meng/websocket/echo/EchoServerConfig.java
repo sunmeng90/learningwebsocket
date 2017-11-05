@@ -1,4 +1,6 @@
-package org.meng.websocket.echo.programatic;
+package org.meng.websocket.echo;
+
+import org.meng.websocket.echo.programatic.EchoEndpoint;
 
 import javax.websocket.Endpoint;
 import javax.websocket.server.ServerApplicationConfig;
@@ -17,8 +19,16 @@ public class EchoServerConfig implements ServerApplicationConfig {
         return result;
     }
 
+    //When using annotation endpoint, make sure register the annotation endpoints here, otherwise, client will get 404
     @Override
     public Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> scanned) {
-        return null;
+        //Deploy all annotated endpoints
+        Set<Class<?>> result = new HashSet<>();
+        for (Class<?> clazz : scanned) {
+            if (clazz.getPackage().getName().startsWith("annotation.") || clazz.getPackage().getName().startsWith("org.")) {
+                result.add(clazz);
+            }
+        }
+        return result;
     }
 }
