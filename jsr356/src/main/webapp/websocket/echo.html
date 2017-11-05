@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="application/javascript">
+        var Echo = {}
+
+        Echo.socket = null;
+
+        Echo.connect = (function (host) {
+            if ('WebSocket' in window) {
+                Echo.socket = new WebSocket(host);
+            } else if ('MozWebSocket' in window) {
+                Echo.socket = new MozWebSocket(host);
+            } else {
+                Console.log('Error: WebSocket is not supported by this browser.');
+                return;
+            }
+
+            Echo.socket.onopen = function () {
+                Console.log('Info: WebSocket connection opened.');
+                document.getElementById('input-box').onkeydown = function (event) {
+                    if (event.keyCode == 13) {
+                        Echo.sendMessage();
+                    }
+                }
+            }
+
+            Echo.socket.onmessage = function (message) {
+                Console.log(message.data);
+            }
+
+            Echo.socket.onclose = function () {
+                document.getElementById('input-box').onkeydown = null;
+                Console.log("Info: Websocket closed.")
+            }
+
+        });
+
+        Echo.init = function () {
+            if (window.location.protocol == 'http:') {
+                Echo.connect('ws://' + window.location.host + '/websocket/programmatic/echo');
+            } else {
+                Echo.connect('ws://' + window.location.host + '/websocket/programmatic/echo');
+            }
+        }
+
+
+        Echo.sendMessage = (function () {
+            var message = document.getElementById('input-box').value;
+            if (message != '') {
+                Echo.socket.send(message);
+                document.getElementById('input-box').value = '';
+            }
+        });
+
+        //Console
+        var Console = {};
+        Console.log = (function (message) {
+            var messagePanel = document.getElementById("message");
+            var p = document.createElement("p");
+            p.style.wordWrap = 'break-word';
+            p.innerHTML = message;
+            messagePanel.appendChild(p);
+            while (messagePanel.childNodes.length > 25) {
+                messagePanel.removeChild(messagePanel.firstElementChild);
+            }
+            messagePanel.scrollTop = messagePanel.scrollHeight;
+        });
+
+        Echo.init();
+
+    </script>
+</head>
+<body>
+<div>
+
+    <div id="main-div">
+        <div>
+            <span>WebSocket Echo Demo</span>
+        </div>
+        <div>
+            <input id="input-box" type="text" size="40" style="width: 350px"/>
+        </div>
+        <div>
+            <div id="message" style="width: 350px">Here is a message!</div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
