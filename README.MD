@@ -247,6 +247,15 @@ public class EchoCodecEndpoint {
     //whenever an object is written to the Session, a Websocket will use an Encoder to convert the object to text and send it back to the client
     //If We return the person here, the message will send back to client again
     //refer: http://www.mastertheboss.com/javaee/websockets/websockets-using-encoders-and-decoders
+    //refer to: http://www.oracle.com/technetwork/articles/java/jsr356-1937161.html
+    /**
+    * If the return type of the method annotated with @OnMessage is not void, the WebSocket implementation will send the return value to the other peer. The following code snippet returns the received text message in capitals back to the sender:
+      
+      @OnMessage
+      public String myOnMessage (String txt) {
+         return txt.toUpperCase();
+         
+    */
     @OnMessage
     public Person onMessage(Person person, Session session) {
         try {
