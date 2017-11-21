@@ -244,10 +244,11 @@ Register Encoder and Decoder in ServerEndpoint
         encoders = {PersonEncoder.class})
 public class EchoCodecEndpoint {
 
-    
+    //whenever an object is written to the Session, a Websocket will use an Encoder to convert the object to text and send it back to the client
+    //If We return the person here, the message will send back to client again
+    //refer: http://www.mastertheboss.com/javaee/websockets/websockets-using-encoders-and-decoders
     @OnMessage
     public Person onMessage(Person person, Session session) {
-
         try {
             session.getBasicRemote().sendObject(person);
         } catch (IOException e) {
@@ -256,7 +257,6 @@ public class EchoCodecEndpoint {
             e.printStackTrace();
         }
         System.out.println("Sent ");
-        return person;
     }
 
     @OnOpen

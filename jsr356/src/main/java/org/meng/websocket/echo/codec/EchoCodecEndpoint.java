@@ -10,7 +10,7 @@ import java.io.IOException;
 public class EchoCodecEndpoint {
 
     @OnMessage
-    public Person onMessage(Person person, Session session) {
+    public void onMessage(Person person, Session session) {
 
         try {
             session.getBasicRemote().sendObject(person);
@@ -20,7 +20,6 @@ public class EchoCodecEndpoint {
             e.printStackTrace();
         }
         System.out.println("Sent ");
-        return person;
     }
 
     @OnOpen
