@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        var personWs = {};
+        personWs.socket = null;
+        //"ws://"+host+"/websocket/codec/echoperson"
+        personWs.connect = function (host) {
+            if('WebSocket' in window){
+                personWs.socket = new WebSocket(host);
+            }else if('MozWebSocket' in window){
+                personWs.socket = new MozWebSocket(host);
+            }else{
+                console.log('Websocket not supported.');
+                return;
+            }
+            
+            personWs.socket.onopen = function () {
+                console.log("Info: websocket connection opened");
+                personWs.socket.send("<person> <id>1</id> <name>hello world</name> </person>");
+
+            };
+
+            personWs.socket.onmessage = function (message) {
+                console.log("Info: Received from server" + message.data);
+            };
+
+            personWs.socket.onclose = function () {
+                console.log("Info: WebSocket closed");
+            };
+
+        };
+
+
+        personWs.init = function () {
+            if(window.location.protocol == "http:"){
+                personWs.connect("ws://"+window.location.host+"/websocket/codec/echoperson");
+            }else{
+                personWs.connect("wss://"+window.location.host+"/websocket/codec/echoperson");
+            }
+        };
+
+        personWs.init();
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>

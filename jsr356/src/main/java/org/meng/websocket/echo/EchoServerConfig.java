@@ -25,6 +25,7 @@ public class EchoServerConfig implements ServerApplicationConfig {
         //Deploy all annotated endpoints
         Set<Class<?>> result = new HashSet<>();
         for (Class<?> clazz : scanned) {
+            System.out.println("package: "+clazz.getPackage());
             if (clazz.getPackage().getName().startsWith("annotation.") || clazz.getPackage().getName().startsWith("org.")) {
                 result.add(clazz);
             }

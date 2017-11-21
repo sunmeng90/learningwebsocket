@@ -42,7 +42,7 @@
             if (window.location.protocol == 'http:') {
                 Echo.connect('ws://' + window.location.host + '/websocket/annotation/echo');
             } else {
-                Echo.connect('ws://' + window.location.host + '/websocket/annotation/echo');
+                Echo.connect('wss://' + window.location.host + '/websocket/annotation/echo');
             }
         }
 

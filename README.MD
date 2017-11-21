@@ -163,3 +163,114 @@ public class EchoServerConfig implements ServerApplicationConfig {
 **Note: **  
 When using programmatic and annotation endpoints, make sure register the annotation endpoints here, otherwise, client will get 404.
 
+Coverting WebSocket messages from and to custom Java Object Using Encoders and Decoders
+
+An encoder takes a Java object and produces a representation that can be transmitted as a WebSocket message   
+* Encoder.Text<T> for text messages
+* Encoder.Binary<T> for binary messages 
+
+```java
+public class PersonEncoder implements Encoder.Text<Person> {
+    @Override
+    public String encode(Person object) throws EncodeException {
+        JAXBContext jaxbContext = null;
+        StringWriter st = null;
+
+        try {
+            jaxbContext = JAXBContext.newInstance(Person.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            st = new StringWriter();
+            marshaller.marshal(object, st);;
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return st.toString();
+    }
+
+    @Override
+    public void init(EndpointConfig config) {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+}
+```
+
+A decoder performs the reverse function; it reads a WebSocket message and creates a Java object.   
+* Decoder.Text<T> for text messages
+* Decoder.Binary<T> for binary messages
+
+```java
+public class PersonDecoder implements Decoder.Text<Person> {
+    @Override
+    public Person decode(String s) throws DecodeException {
+        Person person = null;
+        JAXBContext jaxbContext;
+        try {
+            jaxbContext = JAXBContext.newInstance(Person.class);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            StringReader reader = new StringReader(s);
+            person = (Person) unmarshaller.unmarshal(reader);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return person;
+    }
+
+    @Override
+    public boolean willDecode(String s) {
+        return (s != null);
+    }
+
+    @Override
+    public void init(EndpointConfig config) {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+}
+```
+
+Register Encoder and Decoder in ServerEndpoint
+```java
+@ServerEndpoint(value = "/websocket/codec/echoperson",
+        decoders = {PersonDecoder.class},
+        encoders = {PersonEncoder.class})
+public class EchoCodecEndpoint {
+
+    
+    @OnMessage
+    public Person onMessage(Person person, Session session) {
+
+        try {
+            session.getBasicRemote().sendObject(person);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (EncodeException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Sent ");
+        return person;
+    }
+
+    @OnOpen
+    public void onOpen(Session session) {
+        System.out.println("Websocket opened: " + session.getId());
+    }
+
+    @OnClose
+    public void onClose(CloseReason reason) {
+        System.out.println("Closing a websocket due to " + reason.getReasonPhrase());
+    }
+}
+
+
+```
+
+*** Note: *** Like endpoints, decoder instances are associated with one and only one WebSocket connection and peer, so there is only one thread executing the code of a decoder instance at any given time.
